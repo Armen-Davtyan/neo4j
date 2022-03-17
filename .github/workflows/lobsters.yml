@@ -3,7 +3,7 @@ name: Lobsters Data Import
 on:
   push:
     paths:
-      - .github/workflows/earthobs.yml
+      - .github/workflows/lobsters.yml
   workflow_dispatch:
   schedule:
     - cron: '*/60 * * * *'
