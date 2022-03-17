@@ -9,9 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.5.10",
+    "@neo4j/graphql": "^3.0.1",
+    "@neo4j/graphql-ogm": "^3.0.1",
+    "apollo-server-micro": "^3.6.4",
+    "lodash": "^4.17.21",
+    "neo4j-driver": "^4.4.3",
     "next": "12.1.0",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-force-graph": "^1.41.12",
+    "react-force-graph-2d": "^1.23.10",
+    "react-force-graph-3d": "^1.21.12",
+    "ts-tiny-invariant": "^1.0.5"
   },
   "devDependencies": {
     "eslint": "8.11.0",
