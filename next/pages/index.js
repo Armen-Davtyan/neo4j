@@ -8,7 +8,7 @@ import styles from '../styles/Home.module.css'
 
 const mostRecentQuery = gql`
   {
-    articles(options: { limit: 1, sort: { created: DESC } }) {
+    articles(options: { limit: 5, sort: { created: DESC } }) {
       __typename
       id
       title
@@ -46,21 +46,31 @@ const moreArticlesQuery = gql`
 `;
 
 const searchInfo = gql`
-  query searcharticles($where: ArticleWhere) {
-    articles(where: $where) {
-      title
+query Articles($title_CONTAINS: String) {
+  articles(where: { title_CONTAINS : $title_CONTAINS }) {
+    __typename
+    id
+    title
+    created
+    url
+    user {
+      __typename
+      username
+      avatar
     }
   }
+}
 `;
+
 
 const NoSSRForceGraph = dynamic(() => import("../lib/NoSSRForceGraph"), {
   ssr: false,
 });
 
+
 const formatData = (data) => {
   const nodes = [];
   const links = [];
-  console.log(data)
   if (!data.articles) {
     return { nodes, links };
   }
@@ -94,15 +104,19 @@ const formatData = (data) => {
 export default function Home() {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [searchFilter, setSearchFilter] = useState('');
-  console.log(searchFilter) 
+ 
+  console.log(graphData)
+
+  const [executeSearch, {data: searchData}] = useLazyQuery(
+    searchInfo
+  );
+  console.log(searchData)
+
   const { data } = useQuery(mostRecentQuery, {
     onCompleted: (data) => setGraphData(formatData(data)),
   });
 
-  const [executeSearch] = useLazyQuery(
-    searchInfo
-  );
-
+  let promis = searchFilter === ""
 
 
   const [loadMoreArticles, { called, loading, data: newData }] = useLazyQuery(
@@ -130,7 +144,7 @@ export default function Home() {
        className={styles.search}
        onClick={
          
-        () =>executeSearch({Variables: {where: searchFilter}}) 
+        () =>executeSearch({variables:{title_CONTAINS: searchFilter}}) 
       }
 
      >search</button>
@@ -138,9 +152,9 @@ export default function Home() {
     <NoSSRForceGraph
       nodeAutoColorBy={"__typename"}
       nodeLabel={"id"}
-      graphData={graphData}
+      graphData={graphData} 
       linkDirectionalParticles="value"
-      linkDirectionalArrowLength={5}
+      linkDirectionalArrowLength={8}
       nodeCanvasObjectMode={() => "after"}
       onNodeClick={(node, event) => {
         console.log(node);
@@ -149,6 +163,11 @@ export default function Home() {
         } else if (node.__typename === "Article") {
           window.open(node.url, "_blank");
         }
+      }}
+      onNodeDragEnd={(node) => {
+        node.fx = node.x;
+        node.fy = node.y;
+        node.fz = node.z;
       }}
       nodeCanvasObject={(node, ctx, globalScale) => {
         if (node.__typename === "Tag" || node.__typename === "Article") {
@@ -176,7 +195,7 @@ export default function Home() {
           const size = 30;
           const img = new Image();
           img.src = node.avatar;
-          ctx.drawImage(img, node.x - size / 2, node.y - size / 2, size, size);
+          ctx.drawImage(img, node.x - size /4 , node.y - size /4 , size, size);
         }
       }}
       nodePointerAreaPaint={(node, color, ctx) => {
